@@ -2,16 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../../src/app.module';
-import { IUrlRepository } from '../../src/application/ports/IUrlRepository';
-import { TOKENS } from '../../src/application/tokens';
-import { App } from 'supertest/types';
 import { DataSource } from 'typeorm';
-import { ShortUrlEntity } from '../../src/infrastructure/database/mapper/url.entity';
 import { HttpExceptionFilter } from '../../src/infrastructure/rest/http-exception.filter';
+import { UrlEntity } from 'src/infrastructure/database/mapper/Url.entity';
+import { ShortenedUrlEntity } from 'src/infrastructure/database/mapper/ShortenedUrl.entity';
 
 describe('UrlController (e2e)', () => {
-  let app: INestApplication<App>;
-  let urlRepository: IUrlRepository;
+  let app: INestApplication;
   let dataSource: DataSource;
 
   beforeAll(async () => {
@@ -23,14 +20,15 @@ describe('UrlController (e2e)', () => {
     app.useGlobalFilters(new HttpExceptionFilter());
     await app.init();
 
-    urlRepository = moduleFixture.get<IUrlRepository>(TOKENS.UrlRepository);
     dataSource = moduleFixture.get<DataSource>(DataSource);
   });
 
   afterEach(async () => {
     if (dataSource.isInitialized) {
-      const repository = dataSource.getRepository(ShortUrlEntity);
-      await repository.clear();
+      const shortenedUrlRepository = dataSource.getRepository(ShortenedUrlEntity);
+      await shortenedUrlRepository.clear();
+      const urlRepository = dataSource.getRepository(UrlEntity);
+      await urlRepository.clear();
     }
   });
 
@@ -46,43 +44,34 @@ describe('UrlController (e2e)', () => {
       const originalUrl = 'http://example.com';
       return request(app.getHttpServer())
         .post('/urls/shorten')
-        .send({ url: originalUrl })
+        .send({ originalUrl: originalUrl })
         .expect(201)
         .then((res) => {
           expect(res.body).toHaveProperty('shortenedUrl');
-          expect(res.body.shortenedUrl).toContain('http://localhost:3000/');
+          expect(res.body.shortenedUrl.length).toBe(6);
         });
-    });
-
-    it('should return 400 for an invalid URL', () => {
-      const originalUrl = 'invalid-url';
-      return request(app.getHttpServer())
-        .post('/urls/shorten')
-        .send({ url: originalUrl })
-        .expect(400);
     });
   });
 
-  describe('/urls/:slug (GET)', () => {
-    it('should redirect to the original URL for a valid slug', async () => {
+  describe('/:shortenedValue (GET)', () => {
+    it('should redirect to the original URL for a valid shortened value', async () => {
       const originalUrl = 'http://google.com';
       
       const postResponse = await request(app.getHttpServer())
         .post('/urls/shorten')
-        .send({ url: originalUrl });
+        .send({ originalUrl: originalUrl });
 
-      const shortenedUrl = postResponse.body.shortenedUrl;
-      const slug = shortenedUrl.split('/').pop();
+      const shortenedValue = postResponse.body.shortenedUrl;
 
       return request(app.getHttpServer())
-        .get(`/urls/${slug}`)
+        .get(`/${shortenedValue}`)
         .expect(302)
         .expect('Location', originalUrl);
     });
 
-    it('should return 404 for a non-existent slug', () => {
+    it('should return 404 for a non-existent shortened value', () => {
       return request(app.getHttpServer())
-        .get('/urls/nonexistentslug')
+        .get('/nonexistentslug')
         .expect(404);
     });
   });

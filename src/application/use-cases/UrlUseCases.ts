@@ -1,27 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UrlNotFoundException } from 'src/domain/exceptions/NotFoundUrlException';
-import { ShortUrl } from 'src/domain/models/ShortUrl';
-import { SlugService } from 'src/domain/services/slug.service';
-import { UrlService } from 'src/domain/services/url.service';
+import { Url } from 'src/domain/models/Url';
+import { IUrlRepository } from '../ports/IUrlRepository';
+import { ShortenedUrl } from 'src/domain/models/ShortenedUrl';
+import { TOKENS } from '../tokens';
+import { nanoid } from 'nanoid';
 
 @Injectable()
 export class UrlUseCases {
     constructor(
-        private readonly slugService: SlugService,
-        private readonly urlService: UrlService,
-        private readonly baseUrl: string
+        @Inject(TOKENS.UrlRepository)
+        private readonly urlRepository: IUrlRepository,
     ) {}
 
-    async shortenUrl(url: ShortUrl): Promise<ShortUrl> {
-        this.urlService.validateUrl(url);
-        this.slugService.generateSlug(url);
-        const savedUrl = await this.urlService.saveUrl(url);
-        savedUrl.addDomain(this.baseUrl);
-        return savedUrl;
+    async shortenUrl(originalUrl: string): Promise<ShortenedUrl> {
+        let url = await this.urlRepository.findUrlByValue(originalUrl);
+
+        if (!url) {
+            url = await this.urlRepository.save(new Url(0, originalUrl));
+        }
+
+        const shortenedValue = nanoid(6);
+        const shortenedUrl = new ShortenedUrl(0, shortenedValue, url);
+
+        return this.urlRepository.saveShortenedUrl(shortenedUrl);
     }
 
-    async getOriginalUrlBySlug(slug: string): Promise<ShortUrl> {
-        const url = await this.urlService.getOriginalUrlBySlug(slug);
+    async getOriginalUrl(slug: string): Promise<Url> {
+        const url = await this.urlRepository.findUrlBySlug(slug);
         if(!url){
             throw new UrlNotFoundException();
         }
