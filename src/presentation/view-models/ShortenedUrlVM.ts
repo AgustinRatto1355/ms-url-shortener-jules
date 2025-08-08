@@ -7,7 +7,7 @@ export class ShortenedUrlVM {
 
   static toViewModel(shortenedUrl: ShortenedUrl): ShortenedUrlVM {
     return {
-      shortenedUrl: shortenedUrl.value
+      shortenedUrl: shortenedUrl.shortenedUrl
     }
   }
 }

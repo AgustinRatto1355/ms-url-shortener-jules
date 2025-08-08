@@ -1,6 +1,6 @@
 export class Url {
-  constructor(
-    public readonly id: number,
-    public readonly value: string,
+    public id?: number
+    constructor(
+      public readonly value: string,
   ) {}
 }

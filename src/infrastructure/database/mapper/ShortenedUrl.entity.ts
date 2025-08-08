@@ -14,9 +14,6 @@ export const ShortenedUrlEntity = new EntitySchema<ShortenedUrl>({
     value: {
       type: String,
     },
-    url: {
-        type: Number,
-      },
   },
   relations: {
     url: {

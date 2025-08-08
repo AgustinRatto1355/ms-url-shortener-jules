@@ -5,7 +5,6 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { IUrlRepository } from 'src/application/ports/IUrlRepository';
 import { Url } from 'src/domain/models/Url';
 import { UrlEntity } from '../mapper/Url.entity';
-import { ShortenedUrl } from 'src/domain/models/ShortenedUrl';
 import { ShortenedUrlEntity } from '../mapper/ShortenedUrl.entity';
 
 
@@ -22,11 +21,6 @@ export class UrlRepository
 
   public async findUrlByValue(value: string): Promise<Url | undefined> {
     return this.dataSource.getRepository(UrlEntity).findOne({ where: { value } });
-  }
-
-  public async saveShortenedUrl(shortenedUrl: ShortenedUrl): Promise<ShortenedUrl> {
-    const repository = this.dataSource.getRepository(ShortenedUrlEntity);
-    return await repository.save(shortenedUrl);
   }
 
   public async findUrlBySlug(slug: string): Promise<Url | undefined> {

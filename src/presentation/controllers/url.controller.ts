@@ -15,7 +15,7 @@ export class UrlController {
   async shortenUrl(
     @Body() originalUrlVM: OriginalUrlVM
   ): Promise<ShortenedUrlVM> {
-    const shortenedUrl = await this.urlUseCases.shortenUrl(originalUrlVM.originalUrl);
+    const shortenedUrl = await this.urlUseCases.shortenUrl(originalUrlVM.url);
     return ShortenedUrlVM.toViewModel(shortenedUrl);
   }
 
