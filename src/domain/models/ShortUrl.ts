@@ -7,7 +7,7 @@ export class ShortUrl {
         public readonly originalUrl: string,
     ) {}
 
-    public addDomain(): void{
-        this.shortenedUrl = `http://localhost:3000/urls/${this.slug}`;
+    public addDomain(baseUrl: string): void{
+        this.shortenedUrl = `${baseUrl}/${this.slug}`;
     }
 }

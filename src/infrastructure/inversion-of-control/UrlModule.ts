@@ -13,7 +13,17 @@ import { UrlController } from 'src/presentation/controllers/url.controller';
     UrlService,
     SlugService,
     { provide: TOKENS.UrlRepository, useClass: UrlRepository },
-    UrlUseCases,
+    {
+      provide: UrlUseCases,
+      useFactory: (
+        slugService: SlugService,
+        urlService: UrlService,
+      ) => {
+        const baseUrl = process.env.SHORT_URL_BASE || 'http://localhost:3000';
+        return new UrlUseCases(slugService, urlService, baseUrl);
+      },
+      inject: [SlugService, UrlService],
+    },
   ],
 })
 export class UrlModule {}

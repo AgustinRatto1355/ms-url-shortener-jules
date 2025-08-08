@@ -8,14 +8,15 @@ import { UrlService } from 'src/domain/services/url.service';
 export class UrlUseCases {
     constructor(
         private readonly slugService: SlugService,
-        private readonly urlService: UrlService
+        private readonly urlService: UrlService,
+        private readonly baseUrl: string
     ) {}
 
     async shortenUrl(url: ShortUrl): Promise<ShortUrl> {
         this.urlService.validateUrl(url);
         this.slugService.generateSlug(url);
         const savedUrl = await this.urlService.saveUrl(url);
-        savedUrl.addDomain();
+        savedUrl.addDomain(this.baseUrl);
         return savedUrl;
     }
 
