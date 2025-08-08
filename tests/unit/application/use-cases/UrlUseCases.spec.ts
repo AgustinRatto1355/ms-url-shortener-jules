@@ -5,10 +5,12 @@ import { Url } from 'src/domain/models/Url';
 import { ShortenedUrl } from 'src/domain/models/ShortenedUrl';
 import { UrlNotFoundException } from 'src/domain/exceptions/NotFoundUrlException';
 import { TOKENS } from 'src/application/tokens';
+import { IShortUrlRepository } from 'src/application/ports/IShortUrlRepository';
 
 describe('UrlUseCases', () => {
   let useCases: UrlUseCases;
   let urlRepository: IUrlRepository;
+  let shortUrlRepository: IShortUrlRepository;
 
   const mockUrlRepository = {
     findUrlByValue: jest.fn(),
@@ -28,6 +30,7 @@ describe('UrlUseCases', () => {
 
     useCases = module.get<UrlUseCases>(UrlUseCases);
     urlRepository = module.get<IUrlRepository>(TOKENS.UrlRepository);
+    shortUrlRepository = module.get<IShortUrlRepository>(TOKENS.ShortUrlRepository);
   });
 
   it('should be defined', () => {
@@ -37,8 +40,8 @@ describe('UrlUseCases', () => {
   describe('shortenUrl', () => {
     it('should create a new url and shortened url if url does not exist', async () => {
       const originalUrl = 'http://example.com';
-      const url = new Url(1, originalUrl);
-      const shortenedUrl = new ShortenedUrl(1, 'abcdef', url);
+      const url = new Url( originalUrl);
+      const shortenedUrl = new ShortenedUrl('abcdef', url);
 
       mockUrlRepository.findUrlByValue.mockResolvedValue(undefined);
       mockUrlRepository.save.mockResolvedValue(url);
@@ -47,15 +50,15 @@ describe('UrlUseCases', () => {
       const result = await useCases.shortenUrl(originalUrl);
 
       expect(urlRepository.findUrlByValue).toHaveBeenCalledWith(originalUrl);
-      expect(urlRepository.save).toHaveBeenCalledWith(new Url(0, originalUrl));
-      expect(urlRepository.saveShortenedUrl).toHaveBeenCalled();
+      expect(urlRepository.save).toHaveBeenCalledWith(new Url(originalUrl));
+      expect(shortUrlRepository.saveShortenedUrl).toHaveBeenCalled();
       expect(result).toEqual(shortenedUrl);
     });
 
     it('should use existing url and create a new shortened url if url exists', async () => {
         const originalUrl = 'http://example.com';
-        const url = new Url(1, originalUrl);
-        const shortenedUrl = new ShortenedUrl(1, 'abcdef', url);
+        const url = new Url(originalUrl);
+        const shortenedUrl = new ShortenedUrl('abcdef', url);
 
         mockUrlRepository.findUrlByValue.mockResolvedValue(url);
         mockUrlRepository.saveShortenedUrl.mockResolvedValue(shortenedUrl);
@@ -64,7 +67,7 @@ describe('UrlUseCases', () => {
 
         expect(urlRepository.findUrlByValue).toHaveBeenCalledWith(originalUrl);
         expect(urlRepository.save).not.toHaveBeenCalled();
-        expect(urlRepository.saveShortenedUrl).toHaveBeenCalled();
+        expect(shortUrlRepository.saveShortenedUrl).toHaveBeenCalled();
         expect(result).toEqual(shortenedUrl);
       });
   });
@@ -72,7 +75,7 @@ describe('UrlUseCases', () => {
   describe('getOriginalUrl', () => {
     it('should return the original url', async () => {
       const slug = 'abcdef';
-      const url = new Url(1, 'http://example.com');
+      const url = new Url('http://example.com');
 
       mockUrlRepository.findUrlBySlug.mockResolvedValue(url);
 

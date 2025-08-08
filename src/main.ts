@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { HttpExceptionFilter } from './infrastructure/rest/http-exception.filter';
+import { LoggerInterceptor } from './infrastructure/rest/logger.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type'],
     credentials: false,
   });
+  app.useGlobalInterceptors(new LoggerInterceptor());
   
   await app.startAllMicroservices();
   await app.listen(3000, '0.0.0.0');

@@ -16,6 +16,16 @@ export class ShortUrlService {
     async saveShortenedUrl(url: Url): Promise<ShortenedUrl> {
         const shortenedValue = nanoid(6);
         const shortenedUrl = new ShortenedUrl(shortenedValue, url);
-        return this.shortUrlRepository.save(shortenedUrl);
+        let savedShortenedUrl;
+
+        try {
+            savedShortenedUrl = await this.shortUrlRepository.save(shortenedUrl);
+        } catch (error) {
+            //In case the generated slug already exists — which is very unlikely, since 6 characters give us around 69 billion possible URLs.
+            const shortenedValue = nanoid(6);
+            const shortenedUrl = new ShortenedUrl(shortenedValue, url);
+            savedShortenedUrl = await this.shortUrlRepository.save(shortenedUrl);
+        }
+        return savedShortenedUrl;
     }
 }
