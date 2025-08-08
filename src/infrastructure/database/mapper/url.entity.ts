@@ -1,5 +1,5 @@
 import { EntitySchema } from 'typeorm';
-import { ShortUrl } from 'src/domain/models/ShortUrl';
+import { ShortUrl } from '../../../domain/models/ShortUrl';
 
 export const ShortUrlEntity = new EntitySchema<ShortUrl>({
   name: 'ShortUrl',

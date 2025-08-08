@@ -13,8 +13,8 @@ export const AppDataSource = new DataSource({
   username: db.username,
   password: db.password,
   database: db.database,
-  entities: ['dist/**/*.entity.js'],
-  migrations: ['dist/infrastructure/database/migrations/*.js'],
+  entities: ['src/**/*.entity.ts'],
+  migrations: ['src/infrastructure/database/migrations/*.ts'],
   synchronize: db.syncronize, 
   namingStrategy: new SnakeNamingStrategy()
 });
