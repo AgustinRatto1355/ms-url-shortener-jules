@@ -2,27 +2,20 @@ import { Module } from '@nestjs/common';
 import { TOKENS } from 'src/application/tokens';
 import { UrlRepository } from '../database/repositories/UrlRepository';
 import { UrlUseCases } from 'src/application/use-cases/UrlUseCases';
-import { UrlService } from 'src/domain/services/url.service';
-import { SlugService } from 'src/domain/services/slug.service';
 import { UrlController } from 'src/presentation/controllers/url.controller';
+import { IUrlRepository } from 'src/application/ports/IUrlRepository';
 
 @Module({
   imports: [],
   controllers: [UrlController],
   providers: [
-    UrlService,
-    SlugService,
     { provide: TOKENS.UrlRepository, useClass: UrlRepository },
     {
       provide: UrlUseCases,
-      useFactory: (
-        slugService: SlugService,
-        urlService: UrlService,
-      ) => {
-        const baseUrl = process.env.SHORT_URL_BASE || 'http://localhost:3000';
-        return new UrlUseCases(slugService, urlService, baseUrl);
+      useFactory: (urlRepository: IUrlRepository) => {
+        return new UrlUseCases(urlRepository);
       },
-      inject: [SlugService, UrlService],
+      inject: [TOKENS.UrlRepository],
     },
   ],
 })

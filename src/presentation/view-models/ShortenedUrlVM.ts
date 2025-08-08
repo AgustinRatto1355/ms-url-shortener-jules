@@ -1,13 +1,13 @@
-import { Expose, plainToClass } from 'class-transformer';
-import { ShortUrl } from 'src/domain/models/ShortUrl';
+import { Expose } from 'class-transformer';
+import { ShortenedUrl } from 'src/domain/models/ShortenedUrl';
 
 export class ShortenedUrlVM {
   @Expose()
   shortenedUrl: string;
 
-  static toViewModel(url: ShortUrl): ShortenedUrlVM {
+  static toViewModel(shortenedUrl: ShortenedUrl): ShortenedUrlVM {
     return {
-      shortenedUrl: url.shortenedUrl
+      shortenedUrl: shortenedUrl.value
     }
   }
 }

@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { UrlUseCases } from 'src/application/use-cases/UrlUseCases';
-import { UrlVM } from '../view-models/UrlVM';
 import { ShortenedUrlVM } from '../view-models/ShortenedUrlVM';
 import { Response } from 'express';
-import { ShortUrl } from 'src/domain/models/ShortUrl';
+import { OriginalUrlVM } from '../view-models/OriginalUrlVM';
+import { Url } from 'src/domain/models/Url';
 
 @Controller('')
 export class UrlController {
@@ -13,21 +13,21 @@ export class UrlController {
 
   @Post('urls/shorten')
   async shortenUrl(
-    @Body() urlVM: UrlVM
+    @Body() originalUrlVM: OriginalUrlVM
   ): Promise<ShortenedUrlVM> {
-    const url = await this.urlUseCases.shortenUrl(UrlVM.fromViewModel(urlVM));
-    return ShortenedUrlVM.toViewModel(url);
+    const shortenedUrl = await this.urlUseCases.shortenUrl(originalUrlVM.originalUrl);
+    return ShortenedUrlVM.toViewModel(shortenedUrl);
   }
 
-  @Get(':slug')
+  @Get(':shortenedValue')
   async redirectToOriginalUrl(
-    @Param('slug') slug: string,
+    @Param('shortenedValue') shortenedValue: string,
     @Res() res: Response
   ): Promise<void> {
-    let url: ShortUrl;
+    let url: Url;
     try {
-      url = await this.urlUseCases.getOriginalUrlBySlug(slug);
-      res.redirect(url.originalUrl);
+      url = await this.urlUseCases.getOriginalUrl(shortenedValue);
+      res.redirect(url.value);
     } catch (error) {
       res.redirect('http://localhost:4000/404');
     }
