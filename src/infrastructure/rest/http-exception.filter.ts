@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { InvalidUrlException } from 'src/domain/exceptions/InvalidUrlException';
 import { UrlNotFoundException } from 'src/domain/exceptions/NotFoundUrlException';
 
 @Catch()
@@ -35,7 +36,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode: HttpStatus.NOT_FOUND,
         error: exception.message,
         timestamp: new Date().toISOString(),
-        path: request.url,
+      });
+    }
+    if (exception instanceof InvalidUrlException) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: HttpStatus.BAD_REQUEST,
+        error: exception.message,
+        timestamp: new Date().toISOString(),
       });
     }
 

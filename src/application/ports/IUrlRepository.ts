@@ -7,5 +7,5 @@ import { ShortUrl } from 'src/domain/models/ShortUrl';
 
 @Injectable()
 export abstract class IUrlRepository extends IRepository<ShortUrl> {
-    abstract findUrlByOriginalUrl(originalUrl: string): Promise<ShortUrl|undefined>;
+    abstract findOriginalUrlBySlug(originalUrl: string): Promise<ShortUrl|undefined>;
 }

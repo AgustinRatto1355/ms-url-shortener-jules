@@ -317,6 +317,7 @@ export class BaseRepository<Entity extends ObjectLiteral> {
         | FindOptionsWhere<Entity>,
     maybeOptions?: FindOneOptions<Entity>,
     ): Promise<Entity | undefined | null> {
+
     return this.manager.findOne(this.entitySchema, {
         where: optionsOrConditions as FindOptionsWhere<Entity>,
         });

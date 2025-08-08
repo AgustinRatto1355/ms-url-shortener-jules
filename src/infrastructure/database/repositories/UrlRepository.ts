@@ -18,12 +18,9 @@ export class UrlRepository
     super(dataSource, ShortUrlEntity);
   }
 
-  public async findUrlByOriginalUrl(originalUrl: string): Promise<ShortUrl|undefined>{
-    // return this.dataSource.createQueryBuilder()
-    // .where('originalUrl = :originalUrl')
-    // .setParameter('originalUrl',originalUrl)
-    // .getOne();
-    
-    return this.find()[0];
+  public async findOriginalUrlBySlug(slug: string): Promise<ShortUrl|undefined>{
+    return this.dataSource.getRepository(ShortUrlEntity).createQueryBuilder().select('su')
+      .from(ShortUrlEntity, 'su')
+      .where('su.slug = :slug', { slug }).getOne();
   }
 }

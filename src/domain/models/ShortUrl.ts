@@ -8,6 +8,6 @@ export class ShortUrl {
     ) {}
 
     public addDomain(): void{
-        this.shortenedUrl = `http://localhost:3000/${this.slug}`;
+        this.shortenedUrl = `http://localhost:3000/urls/${this.slug}`;
     }
 }

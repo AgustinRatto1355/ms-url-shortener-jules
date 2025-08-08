@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { HttpExceptionFilter } from './infrastructure/rest/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,8 +15,16 @@ async function bootstrap() {
     },
   });
 
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+    credentials: false,
+  });
+  
   await app.startAllMicroservices();
-  await app.listen(3000);
+  await app.listen(3000, '0.0.0.0');
   console.log('🚀 App running with HTTP + RabbitMQ');
 }
 bootstrap();
